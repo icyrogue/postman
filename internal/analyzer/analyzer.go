@@ -44,6 +44,7 @@ func New(storage Storage, client Client) *analyzer {
 	return &analyzer{storage: storage, client: client}
 }
 
+//Init: создает новый пул для брокера Redis, добавляет обработчика Celery
 func (a *analyzer) Init() {
 	rdPool := &redis.Pool{
 		Dial: func() (redis.Conn, error) {
@@ -64,10 +65,13 @@ func (a *analyzer) Init() {
 	a.celery = cli
 }
 
+//Stop: отпускаем рабочих домой
 func (a *analyzer) Stop() {
 	a.celery.StartWorker()
 }
 
+//StoreTemplate: записывает шаблон для рассылки, путь для сохранения указан в Options.TemplatesDir,
+//для имени файла в формате html использует id рассылки
 func (a *analyzer) StoreTemplate(id string, data []byte) error {
 	err := os.WriteFile(path.Join(a.Options.TemplatesDir, id+".html"), data, 0644)
 	if err != nil {
@@ -76,23 +80,25 @@ func (a *analyzer) StoreTemplate(id string, data []byte) error {
 	return nil
 }
 
-func (a *analyzer) mail(id string) {
+//mail: простой обработчик Celery: отправляет письма всем пользователям из списка с полученным idб
+//возвращает кол-во пользователей в рассылке или 0, если при рассылке произошла ошибка
+func (a *analyzer) mail(id string) int {
 	body, err := template.ParseFiles(path.Join(a.Options.TemplatesDir, id+".html"))
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return 0
 	}
 	data, err := a.storage.Get(context.Background(), id)
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return 0
 	}
 	log.Println(string(data))
 	var users []interface{}
 	err = json.Unmarshal(data, &users)
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return 0
 	}
 	go func() {
 		for _, usr := range users {
@@ -105,8 +111,10 @@ func (a *analyzer) mail(id string) {
 			}
 		}
 	}()
+	return len(users)
 }
 
+//do: загоняет информацию о пользователе в шаблон, отправлет письмо через клиент
 func (w *worker) do() error {
 	var body bytes.Buffer
 	err := w.template.Execute(&body, w.data)

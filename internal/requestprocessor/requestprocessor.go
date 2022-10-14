@@ -28,12 +28,12 @@ func New(storage Storage, asyncStorage AsyncStorage) *requestprocessor {
 	return &requestprocessor{storage: storage, asyncStorage: asyncStorage}
 }
 
-//Get a seed so that ids are random every time
+//init: берет сид для случайных чисел
 func init() {
 	rand.Seed(time.Now().UnixMicro())
 }
 
-//GenID: generates a new ID until there is no such ID already in database
+//genID:  генерирует id из 8 случайных чисел
 func genID() string {
 	chars := []byte("qwertyuiopasdfghklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM")
 	output := []byte{}
@@ -43,10 +43,11 @@ func genID() string {
 	return string(output)
 }
 
+//NewList: создает новый список со случайным id
 func (r *requestprocessor) NewList(ctx context.Context) (id string, err error) {
 	for {
 		id = genID()
-		if err = r.storage.NewList(ctx, id); err == nil {
+		if err = r.storage.NewList(ctx, id); err == nil { //если БД не вернула ошибку, значить такого списка еще нет
 			return id, nil
 		}
 		if errors.Is(err, errors.New("id already exists")) {
@@ -56,10 +57,12 @@ func (r *requestprocessor) NewList(ctx context.Context) (id string, err error) {
 	}
 }
 
+//AddUser: добавляет пользователя в список рассылки по id
 func (r *requestprocessor) AddUser(id string, data []byte) error {
 	if ok := json.Valid(data); !ok {
-		return errors.New("invalid JSON array")
+		return errors.New("invalid JSON")
 	}
+	//БД ожидает новую запись в формате списка, где первый элемент - это ID, второй -  JSON модель пользователя
 	row := make([]interface{}, 2)
 	row[0] = id
 	row[1] = data
@@ -67,11 +70,12 @@ func (r *requestprocessor) AddUser(id string, data []byte) error {
 	return nil
 }
 
+//AddBatch: читает список пользователей в JSON, скидывет каждую запись в очередь
 func (r *requestprocessor) AddBatch(id string, data []byte) error {
 	if ok := json.Valid(data); !ok {
 		return errors.New("invalid JSON array")
 	}
-	first := true
+	first := true //нужно, чтобы избавиться от [ в первом элементе списка
 	split := func(data []byte, atEOF bool) (advance int, token []byte, err error) {
 		if atEOF && len(data) == 0 {
 			return 0, nil, nil

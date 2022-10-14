@@ -35,6 +35,7 @@ func New(storage Storage) *checker {
 	return &checker{storage: storage}
 }
 
+//Init: присоединяется, авторезируется для получения доступа к серверу с уведомлениями о прочтении
 func (c *checker) Init() error {
 	client, err := client.DialTLS(c.Options.Server+":"+c.Options.Port, nil)
 	if err != nil {
@@ -52,13 +53,15 @@ func (c *checker) Close() error {
 	return c.client.Close()
 }
 
+//Check: обновляет ящик с уведомлениями каждые c.Options.WaitTime секунд
+//Если есть новые письма, то запускает проверку на уведомления о прочтении
 func (c *checker) Start(ctx context.Context) {
 	ticker := time.NewTicker(time.Second * time.Duration(c.Options.WaitTime))
 	inbox, err := c.client.Select("INBOX", false)
 	if err != nil {
 		log.Println(err.Error())
 	}
-	var prevCount = uint32(inbox.Messages)
+	var prevCount = uint32(inbox.Messages) //предполагается, что старые сообщения в ящике уже проверены
 	go func() {
 	loop:
 		for {
@@ -71,7 +74,7 @@ func (c *checker) Start(ctx context.Context) {
 				if err != nil {
 					log.Println(err.Error())
 				}
-				var count uint32
+				var count uint32 //inbox.Messeges это uint, поэтому count тоже uint
 				if count = inbox.Messages; count == prevCount {
 					log.Println("not this time")
 					continue loop
@@ -87,6 +90,8 @@ func (c *checker) Start(ctx context.Context) {
 	}()
 }
 
+//check: собирает заголовки новых писем из ящика, если report-type = disposition-notification
+//то добавляет письмо к прочитанным
 func (c *checker) check(from, count uint32) error {
 	log.Println("Checking!", count, from)
 	var section imap.BodySectionName
@@ -94,8 +99,6 @@ func (c *checker) check(from, count uint32) error {
 
 	seqset := new(imap.SeqSet)
 	seqset.AddRange(from, count)
-	//Del
-	log.Println(seqset)
 	messages := make(chan *imap.Message, 55)
 	done := make(chan error, 1)
 	go func() {

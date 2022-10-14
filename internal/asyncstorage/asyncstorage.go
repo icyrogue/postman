@@ -27,6 +27,8 @@ func New(storage Storage) *asyncStorage {
 		storage: storage}
 }
 
+//Start: читает канал-очередь с новыми записями в БД, записывает всю очередь в БД
+//каждые Options.MaxWaitTime секунд или если размер очереди равен Options.MaxBufferLength
 func (as *asyncStorage) Start(ctx context.Context) {
 	d := time.Duration(time.Second * time.Duration(as.Options.MaxWaitTime))
 	timer := time.AfterFunc(d, as.append)
@@ -49,10 +51,12 @@ func (as *asyncStorage) Start(ctx context.Context) {
 	}()
 }
 
+//GetInput: возвращает канал-очередь
 func (as *asyncStorage) GetInput() chan []interface{} {
 	return as.input
 }
 
+//append: обращается к БД со всеми запясами в очереди, обнуляет очередь
 func (as *asyncStorage) append() {
 	if len(as.data) > 0 {
 		log.Println("appending to db")
