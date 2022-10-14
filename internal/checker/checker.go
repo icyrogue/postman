@@ -112,6 +112,9 @@ func (c *checker) check(from, count uint32) error {
 			return err
 		}
 		_, params, err := data.Header.ContentType()
+		if err != nil {
+			return err
+		}
 		hd := params["report-type"]
 		if strings.Contains(hd, "disposition-notification") {
 			tmStamp, err := data.Header.Date()
@@ -124,12 +127,6 @@ func (c *checker) check(from, count uint32) error {
 				log.Println(err.Error())
 				continue
 			}
-			id, err := data.Header.MessageID()
-			if err != nil {
-				log.Println(err.Error())
-				continue
-			}
-			log.Println("found one", addr, tmStamp, id)
 			if err = c.storage.AddRead(context.Background(), addr[0].String(), tmStamp.Format(time.RFC1123)); err != nil {
 				log.Println(err.Error())
 				continue

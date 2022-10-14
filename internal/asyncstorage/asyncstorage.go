@@ -58,7 +58,7 @@ func (as *asyncStorage) append() {
 		log.Println("appending to db")
 		err := as.storage.Add(context.Background(), as.data)
 		if err != nil {
-			log.Println(err.Error)
+			log.Println(err.Error())
 		}
 		as.data = [][]interface{}{}
 	}

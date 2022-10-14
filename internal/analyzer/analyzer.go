@@ -15,7 +15,6 @@ import (
 )
 
 type analyzer struct {
-	pool    *redis.Pool
 	celery  *gocelery.CeleryClient
 	storage Storage
 	client  Client

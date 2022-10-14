@@ -10,9 +10,8 @@ import (
 )
 
 type client struct {
-	client   *smtp.Client
-	template []byte
-	Options  *Options
+	client  *smtp.Client
+	Options *Options
 }
 
 type Options struct {
@@ -33,9 +32,13 @@ func (c *client) Init() error {
 	if err != nil {
 		return err
 	}
-	client.StartTLS(&tls.Config{})
+	if err := client.StartTLS(&tls.Config{}); err != nil {
+		return err
+	}
 	auth := sasl.NewPlainClient("", c.Options.Login, c.Options.Password)
-	client.Auth(auth)
+	if err := client.Auth(auth); err != nil {
+		return err
+	}
 
 	if err != nil {
 		return err
@@ -53,8 +56,12 @@ func (c *client) Close() error {
 
 func (c *client) Send(id, addr string, body []byte) error {
 	log.Println("preparing to send email to", addr)
-	c.client.Mail(c.Options.Login, nil)
-	c.client.Rcpt(addr)
+	if err := c.client.Mail(c.Options.Login, nil); err != nil {
+		return err
+	}
+	if err := c.client.Rcpt(addr); err != nil {
+		return err
+	}
 	wc, err := c.client.Data()
 	if err != nil {
 		return err
