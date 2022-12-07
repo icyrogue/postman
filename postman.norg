@@ -8,9 +8,9 @@ updated: 2022-12-07
 version: 0.0.18
 @end
 
-# Your friendly neighbour mailing list service
+* Your friendly neighbour mailing list service
 Written in pure GO
-## API methods
+** API methods
 - Create new mailing list    
   `POST /api/list` - response is an ID for new mailing list
 - Add user to mailing list  
@@ -23,7 +23,7 @@ Written in pure GO
   `GET /api/list/{id}` - response is an array of JSON structs of individual user's information in mailing list with specific ID
 - Get read statistics from mailing list  
   `GET api/list/{id}/stat` - get information about who read email from mailing list 
-  Checkout implementation {| Read statistics }
+  Checkout implementation {** Read statistics }
 - Add email template to mailing list    
   `POST /api/list/{id}/template` - request's body is a email template in text/html  
   [html/template](https://pkg.go.dev/html/template) is used for email template implementation. This means that all syntax features of gohtml format
@@ -59,6 +59,6 @@ You have 1200 bonuses
 You can spend 'em all here bonusshop.com/id=4535345432
 </body>
 
-## | Read statistics 
+** Read statistics 
 Checking if an email has been read is implemented using [RFC3798](https://datatracker.ietf.org/doc/html/rfc3798) header    
 You can also use service handler `GET /api/{email}/read` to deliberately register that user with this `{email}` has read the message  
