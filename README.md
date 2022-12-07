@@ -55,39 +55,56 @@ version: 0.0.18
 
 #### Add user
 
-`> POST /api/list/{id}`
+> `POST /api/list/{id}`
 ```
 {
 "email": "moya@govorit.net",
 "name": "Alice"
 "bonuses": "1200",
-"link": "bonusshop.com/id=4535345432"
+"link": "season.shop/id=4535345432"
 }
 ```
 
 #### Basic template for a mailing list
 
-```javascript
+```html
 <html>
 <body>
-Hello {{ .name}}
-
-You have {{ .bonuses}} bonuses
-
-You can spend 'em all here {{ .link}}
+     <h1>👋 Hello {{ .name}}</h1>
+    <p>You have {{ .bonuses}} bonusSeas 🐳</p>
+     <p>Spend them wisely on:
+     <ul>
+     <li>Whale rental 🐋</li>
+     <li>Steamboat tickets 💨</li>
+     <li>Investing in sea 🪣</li> 
+     </ul>
+     </p>
+     <p>More inforamtion in your profile <a href="{{ .link}}"><span>here</span> </a></p>
 </body>
 </html>
+## There are multiple better ways to construct an email HTML template, this is just a simple example
 ```
 
 #### This example user information and email template produce the following email
 
-<body>
-  Hello Alice
 
-You have 1200 bonuses
+> **To:** <em>moya@govorit.net</em>   
+> **From:** _sea@son.shop_
+<html>
+  <body>
+  <h1>👋 Hello Alice</h1>
+  <p>You have 1200 bonusSeas 🐳</p>
+  <p>Spend them wisely on:
+  <ul>
+  <li>Whale rental 🐋</li>
+  <li>Steamboat tickets 💨</li>
+  <li>Investing in sea 🪣</li> 
+  </ul>
+  </p>
+  <p>More inforamtion in your profile <a href="season.shop"><span>here</span> </a></p>
+  </body>
+  </html>
 
-You can spend 'em all here bonusshop.com/id=4535345432
-</body>
 
 
 ## Read statistics
