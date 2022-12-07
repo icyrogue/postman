@@ -1,14 +1,3 @@
-title: postman
-description:
-authors: icy
-categories: OP projects
-created: 2022-12-06
-updated: 2022-12-07
-version: 0.0.18
-
-
-
-
 ##### EN | [RU](README_RU.md)
 
 
@@ -87,7 +76,7 @@ version: 0.0.18
 
 #### This example user information and email template produce the following email
 
-
+---
 > **To:** <em>moya@govorit.net</em>   
 > **From:** _sea@son.shop_
 <html>
@@ -105,6 +94,7 @@ version: 0.0.18
   </body>
   </html>
 
+---
 
 
 ## Read statistics
