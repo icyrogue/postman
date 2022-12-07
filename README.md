@@ -8,9 +8,13 @@ version: 0.0.18
 
 
 
- Your friendly neighbour mailing list service
+
+# Your friendly neighbour mailing list service
+
 Written in pure GO
-# API methods
+
+## API methods
+
 - Create new mailing list    
   `POST /api/list` - response is an ID for new mailing list
 - Add user to mailing list  
@@ -59,6 +63,8 @@ You have 1200 bonuses
 You can spend 'em all here bonusshop.com/id=4535345432
 </body>
 
-# | Read statistics 
+
+## Read statistics 
+
 Checking if an email has been read is implemented using [RFC3798](https://datatracker.ietf.org/doc/html/rfc3798) header    
 You can also use service handler `GET /api/{email}/read` to deliberately register that user with this `{email}` has read the message  
